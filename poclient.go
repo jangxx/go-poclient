@@ -31,14 +31,14 @@ func NewPOClient() *POClient {
 	}
 }
 
-//Get user object which contains id and secret
-func (p POClient) User() user {
-	return p.user
+//Get user id and user secret
+func (p POClient) User() (UserID, Secret) {
+	return p.user.Id, p.user.Secret
 }
 
-//Get device object which contains the device_id
-func (p POClient) Device() device {
-	return p.device
+//Get the device_id
+func (p POClient) Device() DeviceID {
+	return p.device.Id
 }
 
 //Restore a previous login
@@ -101,8 +101,8 @@ func (p *POClient) RegisterDevice(name string) error {
 }
 
 //Retrieve user id and user secret.
-//After successfully logging, you should retrieve the user object by calling User() and store
-//the user id and the user secret somewhere safe.
+//After successfully logging, you should retrieve the user id and secret by calling User() and store
+//them somewhere safe.
 func (p *POClient) Login(email string, password string) error {
 	if p.loggedIn {
 		return errors.New("Already logged in")
