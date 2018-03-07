@@ -12,7 +12,7 @@ import (
 //This function is designed to run in a goroutine
 //Note: This function clears all notifications after receiving them, so you should pull messages
 //from the Messages channel and save them if you want to keep them
-func (p *poClient) ListenForNotifications() error {
+func (p *POClient) ListenForNotifications() error {
 	if !p.loggedIn {
 		return errors.New("Not logged in")
 	}

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type poClient struct {
+type POClient struct {
 	loggedIn   bool
 	registered bool
 	user       user
@@ -18,8 +18,8 @@ type poClient struct {
 	Messages   chan Message
 }
 
-func NewPOClient() *poClient {
-	return &poClient{
+func NewPOClient() *POClient {
+	return &POClient{
 		loggedIn:   false,
 		registered: false,
 		user:       user{},
@@ -29,31 +29,31 @@ func NewPOClient() *poClient {
 }
 
 //Get user object which contains id and secret
-func (p poClient) User() user {
+func (p POClient) User() user {
 	return p.user
 }
 
 //Get device object which contains the device_id
-func (p poClient) Device() device {
+func (p POClient) Device() device {
 	return p.device
 }
 
 //Restore a previous login
-func (p *poClient) RestoreLogin(secret Secret, userid UserID) {
+func (p *POClient) RestoreLogin(secret Secret, userid UserID) {
 	p.user.Secret = secret
 	p.user.Id = userid
 	p.loggedIn = true
 }
 
 //Set device_id parameter for future requests
-func (p *poClient) RestoreDevice(devid DeviceID) {
+func (p *POClient) RestoreDevice(devid DeviceID) {
 	p.device.Id = devid
 	p.registered = true
 }
 
 //Registers a new device after logging in
 //The name parameter is a human readable short name (up to 25 characters long) for the device
-func (p *poClient) RegisterDevice(name string) error {
+func (p *POClient) RegisterDevice(name string) error {
 	if !p.loggedIn {
 		return errors.New("Not logged in")
 	}
@@ -97,7 +97,7 @@ func (p *poClient) RegisterDevice(name string) error {
 
 //Retrieve user id and user secret
 //The password should not be saved
-func (p *poClient) Login(email string, password string) error {
+func (p *POClient) Login(email string, password string) error {
 	if p.loggedIn {
 		return errors.New("Already logged in")
 	}
@@ -131,7 +131,7 @@ func (p *poClient) Login(email string, password string) error {
 
 //Get all new messages from the API
 //Usually you call DeleteOldMessages right afterwards to clear all pending notifications
-func (p *poClient) GetMessages() (error, []Message) {
+func (p *POClient) GetMessages() (error, []Message) {
 	if !p.loggedIn {
 		return errors.New("Not logged in"), []Message{}
 	}
@@ -167,7 +167,7 @@ func (p *poClient) GetMessages() (error, []Message) {
 
 //Deletes all pending notifications from the server
 //This action is permanent, so you need to save the messages if you want to keep them
-func (p *poClient) DeleteOldMessages(messages *[]Message) error {
+func (p *POClient) DeleteOldMessages(messages *[]Message) error {
 	highest_id := 0
 
 	for _, msg := range *messages {

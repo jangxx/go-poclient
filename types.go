@@ -64,7 +64,7 @@ type Message struct {
 	ContainsHTML ConvertibleBoolean `json:"html"`
 }
 
-//https://stackoverflow.com/questions/30856454/how-to-unmarshall-both-0-and-false-as-bool-from-json
+//Taken from https://stackoverflow.com/questions/30856454/how-to-unmarshall-both-0-and-false-as-bool-from-json
 type ConvertibleBoolean bool
 
 func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
