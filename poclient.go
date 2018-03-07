@@ -10,6 +10,9 @@ import (
 	"time"
 )
 
+//The main Pushover Client.
+//The Messages channel works in conjuction with ListenForNotifications,
+//which pushes incoming Messages into this channel.
 type POClient struct {
 	loggedIn   bool
 	registered bool
@@ -53,6 +56,8 @@ func (p *POClient) RestoreDevice(devid DeviceID) {
 
 //Registers a new device after logging in.
 //The name parameter is a human readable short name (up to 25 characters long) for the device.
+//After successfully registering the device you should retrieve the device_id by calling Device()
+//and store it in a safe place.
 func (p *POClient) RegisterDevice(name string) error {
 	if !p.loggedIn {
 		return errors.New("Not logged in")
@@ -96,7 +101,8 @@ func (p *POClient) RegisterDevice(name string) error {
 }
 
 //Retrieve user id and user secret.
-//The password should not be saved.
+//After successfully logging, you should retrieve the user object by calling User() and store
+//the user id and the user secret somewhere safe.
 func (p *POClient) Login(email string, password string) error {
 	if p.loggedIn {
 		return errors.New("Already logged in")
