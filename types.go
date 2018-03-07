@@ -45,6 +45,7 @@ type UserID string
 
 type DeviceID string
 
+//The fields are documented here: https://pushover.net/api/client#download
 type Message struct {
 	RelativeId   int                `json:"id"`
 	UniqueId     int                `json:"umid"`
@@ -59,15 +60,15 @@ type Message struct {
 	Sound        string             `json:"sound"`
 	Url          string             `json:"url"`
 	UrlTitle     string             `json:"url_title"`
-	Acknowledged ConvertibleBoolean `json:"acked"`
+	Acknowledged convertibleBoolean `json:"acked"`
 	ReceiptCode  string             `json:"receipt"`
-	ContainsHTML ConvertibleBoolean `json:"html"`
+	ContainsHTML convertibleBoolean `json:"html"`
 }
 
 //Taken from https://stackoverflow.com/questions/30856454/how-to-unmarshall-both-0-and-false-as-bool-from-json
-type ConvertibleBoolean bool
+type convertibleBoolean bool
 
-func (bit *ConvertibleBoolean) UnmarshalJSON(data []byte) error {
+func (bit *convertibleBoolean) UnmarshalJSON(data []byte) error {
 	asString := string(data)
 	if asString == "1" || asString == "true" {
 		*bit = true

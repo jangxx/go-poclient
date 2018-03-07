@@ -51,8 +51,8 @@ func (p *POClient) RestoreDevice(devid DeviceID) {
 	p.registered = true
 }
 
-//Registers a new device after logging in
-//The name parameter is a human readable short name (up to 25 characters long) for the device
+//Registers a new device after logging in.
+//The name parameter is a human readable short name (up to 25 characters long) for the device.
 func (p *POClient) RegisterDevice(name string) error {
 	if !p.loggedIn {
 		return errors.New("Not logged in")
@@ -95,8 +95,8 @@ func (p *POClient) RegisterDevice(name string) error {
 	return nil
 }
 
-//Retrieve user id and user secret
-//The password should not be saved
+//Retrieve user id and user secret.
+//The password should not be saved.
 func (p *POClient) Login(email string, password string) error {
 	if p.loggedIn {
 		return errors.New("Already logged in")
@@ -129,7 +129,7 @@ func (p *POClient) Login(email string, password string) error {
 	return nil
 }
 
-//Get all new messages from the API
+//Get all new messages from the API.
 //Usually you call DeleteOldMessages right afterwards to clear all pending notifications
 func (p *POClient) GetMessages() (error, []Message) {
 	if !p.loggedIn {
@@ -165,7 +165,7 @@ func (p *POClient) GetMessages() (error, []Message) {
 	return nil, reply.Messages
 }
 
-//Deletes all pending notifications from the server
+//Deletes all pending notifications from the server.
 //This action is permanent, so you need to save the messages if you want to keep them
 func (p *POClient) DeleteOldMessages(messages *[]Message) error {
 	highest_id := 0
