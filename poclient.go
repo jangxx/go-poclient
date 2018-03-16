@@ -54,6 +54,11 @@ func (p *POClient) RestoreDevice(devid DeviceID) {
 	p.registered = true
 }
 
+//Get status (loggedIn, registered)
+func (p *POClient) GetStatus() (bool, bool) {
+	return p.loggedIn, p.registered
+}
+
 //Registers a new device after logging in.
 //The name parameter is a human readable short name (up to 25 characters long) for the device.
 //After successfully registering the device you should retrieve the device_id by calling Device()
@@ -101,7 +106,7 @@ func (p *POClient) RegisterDevice(name string) error {
 }
 
 //Retrieve user id and user secret.
-//After successfully logging, you should retrieve the user id and secret by calling User() and store
+//After successfully logging in, you should retrieve the user id and secret by calling User() and store
 //them somewhere safe.
 func (p *POClient) Login(email string, password string) error {
 	if p.loggedIn {

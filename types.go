@@ -79,3 +79,9 @@ func (bit *convertibleBoolean) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+type ErrorFrameError struct{}
+
+func (e *ErrorFrameError) Error() string {
+	return "Received error frame"
+}

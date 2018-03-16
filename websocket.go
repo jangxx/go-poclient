@@ -57,7 +57,7 @@ func (p *POClient) ListenForNotifications() error {
 			case "R":
 				reconnect = true
 			case "E":
-				return errors.New("Received error frame")
+				return &ErrorFrameError{}
 			}
 		} else {
 			return err
