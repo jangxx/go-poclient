@@ -40,27 +40,27 @@ func (p *POClient) ListenForNotifications() error {
 			continue
 		}
 
-		if err == nil {
-			message := string(msgBytes)
-
-			switch message {
-			case "#": //do nothing
-			case "!":
-				err, messages := p.GetMessages()
-				if err != nil {
-					return err
-				}
-				for _, msg := range messages {
-					p.Messages <- msg //send messages into message channel
-				}
-				p.DeleteOldMessages(&messages)
-			case "R":
-				reconnect = true
-			case "E":
-				return errors.New("Received error frame")
-			}
-		} else {
+		if err != nil {
 			return err
+		}
+
+		message := string(msgBytes)
+
+		switch message {
+		case "#": //do nothing
+		case "!":
+			err, messages := p.GetMessages()
+			if err != nil {
+				return err
+			}
+			for _, msg := range messages {
+				p.Messages <- msg //send messages into message channel
+			}
+			p.DeleteOldMessages(&messages)
+		case "R":
+			reconnect = true
+		case "E":
+			return errors.New("Received error frame")
 		}
 
 		if reconnect {
