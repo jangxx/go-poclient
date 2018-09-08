@@ -171,18 +171,11 @@ func (p *POClient) GetMessages() (error, []Message) {
 	return nil, reply.Messages
 }
 
-//Deletes all pending notifications from the server.
-//This action is permanent, so you need to save the messages if you want to keep them
-func (p *POClient) DeleteOldMessages(messages *[]Message) error {
-	highest_id := 0
-
-	for _, msg := range *messages {
-		if msg.RelativeId > highest_id {
-			highest_id = msg.RelativeId
-		}
-	}
-
-	resp, err := http.PostForm(fmt.Sprintf("https://api.pushover.net/1/devices/%s/update_highest_message.json", p.device.Id), url.Values{"secret": {string(p.user.Secret)}, "message": {strconv.Itoa(highest_id)}})
+// DeleteMessagesByID marks all messages below the given relative ID as
+// read which means they will not be transmitted again by the API
+// https://pushover.net/api/client#delete
+func (p POClient) DeleteMessagesByID(highestID int) error {
+	resp, err := http.PostForm(fmt.Sprintf("https://api.pushover.net/1/devices/%s/update_highest_message.json", p.device.Id), url.Values{"secret": {string(p.user.Secret)}, "message": {strconv.Itoa(highestID)}})
 
 	if err != nil {
 		return err
@@ -201,4 +194,18 @@ func (p *POClient) DeleteOldMessages(messages *[]Message) error {
 	}
 
 	return nil
+}
+
+//Deletes all pending notifications from the server.
+//This action is permanent, so you need to save the messages if you want to keep them
+func (p *POClient) DeleteOldMessages(messages *[]Message) error {
+	highest_id := 0
+
+	for _, msg := range *messages {
+		if msg.RelativeId > highest_id {
+			highest_id = msg.RelativeId
+		}
+	}
+
+	return p.DeleteMessagesByID(highest_id)
 }
