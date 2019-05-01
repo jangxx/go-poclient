@@ -126,6 +126,42 @@ func (p *Client) Login(email string, password string) error {
 
 	defer resp.Body.Close()
 
+	if resp.StatusCode == 412 {
+		return &Missing2FAError{}
+	}
+
+	reply := loginReply{}
+	err = json.NewDecoder(resp.Body).Decode(&reply)
+
+	if err != nil {
+		return err
+	}
+
+	if reply.Status == 0 {
+		return errors.New(reply.Errors[0])
+	}
+
+	p.user.Secret = reply.Secret
+	p.user.ID = reply.Userid
+	p.loggedIn = true
+	p.registered = false
+
+	return nil
+}
+
+func (p *Client) Login2FA(email string, password string, twofacode string) error {
+	if p.loggedIn {
+		return errors.New("Already logged in")
+	}
+
+	resp, err := http.PostForm("https://api.pushover.net/1/users/login.json", url.Values{"email": {email}, "password": {password}, "twofa": {twofacode}})
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
 	reply := loginReply{}
 	err = json.NewDecoder(resp.Body).Decode(&reply)
 

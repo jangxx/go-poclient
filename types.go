@@ -79,3 +79,9 @@ type ErrorFrameError struct{}
 func (e *ErrorFrameError) Error() string {
 	return "Received error frame"
 }
+
+type Missing2FAError struct{}
+
+func (e *Missing2FAError) Error() string {
+	return "2 Factor Authentication required"
+}

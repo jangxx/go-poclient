@@ -1,5 +1,6 @@
 # 1.1.0 / 2019-05-01
 
+  * Added support for 2FA Login
   * Added method to close an open websocket connection
   * Integrate improvements into repository
   * Added method to get the login/registration status, added custom error type for when the websocket connection received an error frame
