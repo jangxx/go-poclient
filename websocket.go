@@ -12,7 +12,7 @@ import (
 // This function is designed to run in a goroutine
 // Note: This function clears all notifications after receiving them, so you should pull messages
 // from the Messages channel and save them if you want to keep them
-func (p Client) ListenForNotifications() error {
+func (p *Client) ListenForNotifications() error {
 	if !p.loggedIn {
 		return errors.New("Not logged in")
 	}
@@ -27,6 +27,8 @@ func (p Client) ListenForNotifications() error {
 		return err
 	}
 	defer conn.Close()
+
+	p.wsConn = conn // store reference to connection
 
 	if err := conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("login:%s:%s\n", p.device.ID, p.user.Secret))); err != nil {
 		return err
@@ -50,6 +52,16 @@ func (p Client) ListenForNotifications() error {
 	}
 
 	return p.ListenForNotifications() // reconnect
+}
+
+// CloseWebsocket forcefully closes a open websocket connection, if one exists
+// This also causes a running ListenForNotifications to return an error,
+// which you can use to reconnect
+func (p *Client) CloseWebsocket() {
+	if p.wsConn != nil {
+		p.wsConn.Close()
+		p.wsConn = nil
+	}
 }
 
 func (p Client) handleNotification(message string) (reconnect bool, err error) {

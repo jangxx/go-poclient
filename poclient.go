@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // Client represents the main Pushover Client.
@@ -18,6 +20,7 @@ type Client struct {
 	registered bool
 	user       user
 	device     device
+	wsConn     *websocket.Conn
 	Messages   chan Message
 }
 
@@ -28,6 +31,7 @@ func New() *Client {
 		registered: false,
 		user:       user{},
 		device:     device{},
+		wsConn:     nil,
 		Messages:   make(chan Message, 32),
 	}
 }
