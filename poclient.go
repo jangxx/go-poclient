@@ -209,7 +209,7 @@ func (p Client) GetMessages() ([]Message, error) {
 		return reply.Messages, errors.New("Getting messages led to a status != 1")
 	}
 
-	//parse all timestamps into time.Time
+	// parse all timestamps into time.Time
 	for i, msg := range reply.Messages {
 		reply.Messages[i].Date = time.Unix(msg.Timestamp, 0)
 	}

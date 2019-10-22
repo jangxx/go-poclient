@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
 // ListenForNotifications connects to the WebSocket endpoint and waits for incoming notifications
 // This function is designed to run in a goroutine
+// If no keep-alive packet is received for one minute, the function exits with a timeout error (net.Error).
 // Note: This function clears all notifications after receiving them, so you should pull messages
 // from the Messages channel and save them if you want to keep them
 func (p *Client) ListenForNotifications() error {
@@ -37,6 +39,9 @@ func (p *Client) ListenForNotifications() error {
 	reconnect := false
 
 	for !reconnect {
+		// time out after no keep-alive has been received for one minute
+		conn.SetReadDeadline(time.Now().Add(1 * time.Minute))
+
 		msgType, msgBytes, err := conn.ReadMessage()
 		if err != nil {
 			return err
