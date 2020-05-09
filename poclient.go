@@ -7,10 +7,14 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
+
+const LIBRARY_NAME string = "go-poclient"
+const LIBRARY_VERSION string = "1.2.0"
 
 // Client represents the main Pushover Client.
 // The Messages channel works in conjunction with ListenForNotifications,
@@ -22,6 +26,8 @@ type Client struct {
 	device     device
 	wsConn     *websocket.Conn
 	Messages   chan Message
+	appName    string
+	appVersion string
 }
 
 // New creates a new POClient with default values
@@ -33,6 +39,8 @@ func New() *Client {
 		device:     device{},
 		wsConn:     nil,
 		Messages:   make(chan Message, 32),
+		appName:    "DefaultApp",
+		appVersion: "NoVersionString",
 	}
 }
 
@@ -64,6 +72,13 @@ func (p *Client) GetStatus() (bool, bool) {
 	return p.loggedIn, p.registered
 }
 
+// SetAppInfo sets information about the calling app, which is sent with every request
+// so that pushover can identify the applications using their API
+func (p *Client) SetAppInfo(appName string, appVersion string) {
+	p.appName = appName
+	p.appVersion = appVersion
+}
+
 // RegisterDevice registers a new device after logging in.
 // The name parameter is a human readable short name (up to 25 characters long) for the device.
 // After successfully registering the device you should retrieve the device_id by calling Device()
@@ -79,7 +94,7 @@ func (p *Client) RegisterDevice(name string) error {
 		return errors.New("Name is too long")
 	}
 
-	resp, err := http.PostForm("https://api.pushover.net/1/devices.json", url.Values{"secret": {p.user.Secret}, "name": {name}, "os": {"O"}})
+	resp, err := p.SendRequest("https://api.pushover.net/1/devices.json", url.Values{"secret": {p.user.Secret}, "name": {name}, "os": {"O"}})
 
 	if err != nil {
 		return err
@@ -118,7 +133,7 @@ func (p *Client) Login(email string, password string) error {
 		return errors.New("Already logged in")
 	}
 
-	resp, err := http.PostForm("https://api.pushover.net/1/users/login.json", url.Values{"email": {email}, "password": {password}})
+	resp, err := p.SendRequest("https://api.pushover.net/1/users/login.json", url.Values{"email": {email}, "password": {password}})
 
 	if err != nil {
 		return err
@@ -154,7 +169,7 @@ func (p *Client) Login2FA(email string, password string, twofacode string) error
 		return errors.New("Already logged in")
 	}
 
-	resp, err := http.PostForm("https://api.pushover.net/1/users/login.json", url.Values{"email": {email}, "password": {password}, "twofa": {twofacode}})
+	resp, err := p.SendRequest("https://api.pushover.net/1/users/login.json", url.Values{"email": {email}, "password": {password}, "twofa": {twofacode}})
 
 	if err != nil {
 		return err
@@ -221,7 +236,7 @@ func (p Client) GetMessages() ([]Message, error) {
 // read which means they will not be transmitted again by the API
 // https://pushover.net/api/client#delete
 func (p Client) DeleteMessagesByID(highestID int) error {
-	resp, err := http.PostForm(
+	resp, err := p.SendRequest(
 		fmt.Sprintf("https://api.pushover.net/1/devices/%s/update_highest_message.json", p.device.ID),
 		url.Values{"secret": {p.user.Secret}, "message": {strconv.Itoa(highestID)}},
 	)
@@ -257,4 +272,17 @@ func (p Client) DeleteOldMessages(messages []Message) error {
 	}
 
 	return p.DeleteMessagesByID(highestID)
+}
+
+func (p Client) SendRequest(endpoint string, data url.Values) (*http.Response, error) {
+	req, err := http.NewRequest("POST", endpoint, strings.NewReader(data.Encode()))
+
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", fmt.Sprintf("%s v%s (%s v%s)", p.appName, p.appVersion, LIBRARY_NAME, LIBRARY_VERSION))
+
+	return http.DefaultClient.Do(req)
 }

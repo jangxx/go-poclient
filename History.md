@@ -1,3 +1,7 @@
+# 1.2.0 / 2020-05-09
+
+  * Added method to set an application name and version, which will be sent with every request to the API
+
 # 1.1.0 / 2019-05-01
 
   * Added support for 2FA Login
